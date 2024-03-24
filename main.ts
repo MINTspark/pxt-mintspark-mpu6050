@@ -239,7 +239,33 @@ namespace MINTsparkMpu6050{
         return { accell: accel, gyro:gyro, orientation:orientation };
     }
 
-    export function CalibrateAccelGyro() {
+    export function Calibrate(seconds: number) {
+        // Initial calibration using FIFO buffer
+        calibrateAccelGyro();
+        
+        // Longer calibration for gyros
+        let calibrationTime = seconds * 1000;
+        let startTime = input.runningTime();
+        calgXSum = 0, calgYSum = 0, calgZSum = 0, calCounter = 0;
+
+        // Start calibration
+        calibrate = true;
+        while ((input.runningTime() - startTime) < calibrationTime)
+        {
+            UpdateMPU6050();
+        }
+        calibrate = false;
+
+        // Calculate and apply drift
+        gXDrift = calgXSum / calCounter;
+        gYDrift = calgYSum / calCounter;
+        gZDrift = calgZSum / calCounter;
+        calibration.gyroBias[0] += gXDrift;
+        calibration.gyroBias[1] += gYDrift;
+        calibration.gyroBias[2] += gZDrift;
+    }
+
+    function calibrateAccelGyro() {
         let data: number[];
         let ii, packet_count, fifo_count: number;
         let gyro_bias: number[] = [0, 0, 0];
@@ -404,25 +430,6 @@ namespace MINTsparkMpu6050{
         }
 
         writeByte(MPU6050_GYRO_CONFIG, c); // Write new GYRO_CONFIG register value
-    }
-
-    export function calibrateGyros(seconds: number) {
-        let startTime = input.runningTime();
-        calgXSum = 0, calgYSum = 0, calgZSum = 0, calCounter = 0;
-
-        // Start calibration
-        calibrate = true;
-        basic.pause(seconds * 1000);
-        calibrate = false;
-
-        // Calculate drift
-        gXDrift = calgXSum / calCounter;
-        gYDrift = calgYSum / calCounter;
-        gZDrift = calgZSum / calCounter;
-
-        calibration.gyroBias[0] += gXDrift;
-        calibration.gyroBias[1] += gYDrift;
-        calibration.gyroBias[2] += gZDrift;
     }
 
     function combineBytes(h: number, l: number): number {
