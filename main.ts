@@ -221,7 +221,7 @@ namespace MINTsparkMpu6050{
         {
             // Integrate to calc pitch, roll, yaw (yaw has an empirical division by PI to provide correct degree values but not sure why :-)). Code based on: https://github.com/jremington/MPU-6050-Fusion/
             // Conversions: http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles WARNING: This angular conversion is for DEMONSTRATION PURPOSES ONLY. It WILL MALFUNCTION for certain combinations of angles! See https://en.wikipedia.org/wiki/Gimbal_lock
-            Mahony_update_full(accel.accelX, accel.accelY, accel.accelZ, gyro.gyroX, gyro.gyroY, gyro.gyroZ / Math.PI, deltat);
+            Mahony_update_full(accel.accelX, accel.accelY, accel.accelZ, gyro.gyroX * Math.PI / 180, gyro.gyroY * Math.PI / 180, gyro.gyroZ * Math.PI / 180, deltat);
             roll = Math.atan2((q[0] * q[1] + q[2] * q[3]), 0.5 - (q[1] * q[1] + q[2] * q[2]));
             pitch = Math.asin(2.0 * (q[0] * q[2] - q[1] * q[3]));
             yaw = -Math.atan2((q[1] * q[2] + q[0] * q[3]), 0.5 - (q[2] * q[2] + q[3] * q[3]));
