@@ -132,7 +132,7 @@ namespace MINTsparkMpu6050{
 
     export function UpdateMPU6050() : CurrentData {
         // Return null if no data is available
-        if (!dataAvailable()) return null;
+        if (!dataAvailable()) return { accell: accel, gyro: gyro, orientation: orientation };
 
         // Read the 14 raw data registers into data array
         let rawData = readBytes(MPU6050_ACCEL_XOUT_H, 14);  
