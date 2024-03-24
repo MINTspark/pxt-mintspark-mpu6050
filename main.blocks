@@ -1,4 +1,1 @@
-<xml xmlns="http://www.w3.org/1999/xhtml">
-  <block type="pxt-on-start"></block>
-  <block type="device_forever"></block>
-</xml>
+<xml xmlns="https://developers.google.com/blockly/xml"><block type="pxt-on-start" id="^2~2%v{7s]5s1yw!U_[5" x="20" y="20"></block><block type="device_forever" id="PuhgTYcR8W4W{2_@@Hg!" x="225" y="20"></block></xml>
