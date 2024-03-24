@@ -502,10 +502,7 @@ namespace MINTsparkMpu6050{
             // Apply proportional feedback to gyro term
             gx += Kp * ex;
             gy += Kp * ey;
-
-            serial.writeValue("gz1", gz);
             gz += Kp * ez;
-            serial.writeValue("gz2", gz);
         }
 
         // Integrate rate of change of quaternion, q cross gyro term
