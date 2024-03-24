@@ -107,10 +107,10 @@ namespace MINTsparkMpu6050{
         // determined inset in CONFIG above
 
         // Set gyroscope full scale range
-        setGyroRange(2000);
+        setGyroRange(250);
 
         // Set accelerometer full-scale range configuration
-        setAccelRange(16);
+        setAccelRange(2);
 
         // Set accelerometer sample rate configuration
         // It is possible to get a 4 kHz sample rate from the accelerometer by choosing 1 for
