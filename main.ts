@@ -1,5 +1,43 @@
 // Code is based on FastIMU library: https://github.com/LiquidCGS/FastIMU
-namespace MintsparkMpu6050{
+namespace MINTsparkMpu6050{
+    type AccelData = {
+        accelX: number;
+        accelY: number;
+        accelZ: number;
+    };
+
+    type GyroData = {
+        gyroX: number;
+        gyroY: number;
+        gyroZ: number;
+    };
+
+    type OrientationData = {
+        pitch: number;
+        roll: number;
+        yaw: number;
+    };
+
+    type GyroDrift = {
+        gyroX: number;
+        gyroY: number;
+        gyroZ: number;
+    };
+
+    type CalData = {
+        valid: boolean;
+        accelBias: number[];
+        gyroBias: number[];
+        magBias: number[];
+        magScale: number[];
+    };
+
+    type CurrentData = {
+        accell: AccelData;
+        gyro: GyroData;
+        orientation: OrientationData;
+    };
+
     // MPU-6050 registers
     // https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf
     // https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf
@@ -23,8 +61,8 @@ namespace MintsparkMpu6050{
     let MPU6050_FIFO_R_W = 0x74;
 
     let q: number[] = [1.0, 0.0, 0.0, 0.0]; // vector to hold quaternion
-    let Kp = 30.0; // Free parameters in the Mahony filter and fusion scheme,
-    let Ki = 0.0;  // Kp for proportional feedback, Ki for integral
+    let Kp: number = 30.0; // Free parameters in the Mahony filter and fusion scheme,
+    let Ki: number = 0.0;  // Kp for proportional feedback, Ki for integral
     let lastUpdate: number = 0;
     let roll: number, pitch: number, yaw: number = 0;
     let rollDrift: number, pitchDrift: number, yawDrift: number = 0;
@@ -34,7 +72,6 @@ namespace MintsparkMpu6050{
     let calgYSum = 0;
     let calgZSum = 0;
     let calCounter = 0;
-    let init = 0
     let aRes = 16.0 / 32768.0;
     let gRes = 250.0 / 32768.0;
     let temperature = 0.0;
@@ -42,59 +79,16 @@ namespace MintsparkMpu6050{
     let gyro: GyroData = { gyroX: 0, gyroY: 0, gyroZ: 0 };
     let calibration: CalData = { accelBias: [0, 0, 0], gyroBias: [0, 0, 0], magBias: [0, 0, 0], magScale: [0, 0, 0], valid: true };
     let geometryIndex = 0;
+    let orientation: OrientationData = { pitch:0, roll:0, yaw:0 };
 
-    type AccelData = {
-        accelX: number;
-        accelY: number;
-        accelZ: number;
-    };
-
-    type GyroData = {
-        gyroX: number;
-        gyroY: number;
-        gyroZ: number;
-    };
-
-    type GyroDrift = {
-        gyroX: number;
-        gyroY: number;
-        gyroZ: number;
-    };
-
-    type CalData = {
-        valid: boolean;
-        accelBias: number[];
-        gyroBias: number[];
-        magBias: number[];
-        magScale: number[];
-    };
-
-
-
-    if (InitMPU6050()) {
-        CalibrateAccelGyro();
-        setAccelRange(2);
-        setGyroRange(500);
-        basic.pause(100);
-        init = 1
-    }
-
-    basic.forever(function () {
-        if (init == 1) {
-            lastUpdate = input.runningTime();
-            UpdateMPU6050();
-            //serial.writeValue("gx", gyro.gyroX);
-            //serial.writeValue("gy", gyro.gyroY);
-            //serial.writeValue("gz", gyro.gyroZ);
-        }
-    })
-
-
-    export function InitMPU6050(): boolean {
+    export function InitMPU6050(mountIndex: number): boolean {
         // Check device is connected
         if (!(readByte(MPU6050_WHO_AM_I_MPU6050) == MPU6050_ADDRESS)) {
             return false;
         }
+
+        // Sets the position and location geometry of the sensor, see: https://github.com/LiquidCGS/FastIMU/blob/main/MountIndex.png
+        geometryIndex = mountIndex;
 
         // Reset device
         writeByte(MPU6050_PWR_MGMT_1, 0x80); // Write a one to bit 7 reset bit; toggle reset device
@@ -136,15 +130,15 @@ namespace MintsparkMpu6050{
         return true;
     }
 
-    export function UpdateMPU6050() {
-        if (!dataAvailable()) return;
+    export function UpdateMPU6050() : CurrentData {
+        // Return null if no data is available
+        if (!dataAvailable()) return null;
 
-        let IMUCount: number[] = []; // used to read all 14 bytes at once from the MPU6050 accel/gyro
-        // x/y/z accel register data stored here
+        // Read the 14 raw data registers into data array
+        let rawData = readBytes(MPU6050_ACCEL_XOUT_H, 14);  
 
-        let rawData = readBytes(MPU6050_ACCEL_XOUT_H, 14);    // Read the 14 raw data registers into data array
-
-        IMUCount[0] = combineBytes(rawData[0], rawData[1]);		  // Turn the MSB and LSB into a signed 16-bit value
+        let IMUCount: number[] = [];
+        IMUCount[0] = combineBytes(rawData[0], rawData[1]);
         IMUCount[1] = combineBytes(rawData[2], rawData[3]);
         IMUCount[2] = combineBytes(rawData[4], rawData[5]);
         IMUCount[3] = combineBytes(rawData[6], rawData[7]);
@@ -209,24 +203,6 @@ namespace MintsparkMpu6050{
                 break;
         }
 
-        // Catch elapsed time since last update for integration
-        let now = input.runningTime();
-        let deltat = (now - lastUpdate) / 1000; //seconds since last update
-        lastUpdate = now;
-
-        // Integrate to calc pitch, roll, yaw (yaw has an empirical division by PI to provide correct degree values but not sure why :-) )
-        // Code based on: https://github.com/jremington/MPU-6050-Fusion/
-        // Conversions: http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-        // WARNING: This angular conversion is for DEMONSTRATION PURPOSES ONLY. It WILL MALFUNCTION for certain combinations of angles! See https://en.wikipedia.org/wiki/Gimbal_lock
-        Mahony_update_full(accel.accelX, accel.accelY, accel.accelZ, gyro.gyroX, gyro.gyroY, gyro.gyroZ / Math.PI, deltat);
-        roll = Math.atan2((q[0] * q[1] + q[2] * q[3]), 0.5 - (q[1] * q[1] + q[2] * q[2]));
-        pitch = Math.asin(2.0 * (q[0] * q[2] - q[1] * q[3]));
-        yaw = -Math.atan2((q[1] * q[2] + q[0] * q[3]), 0.5 - (q[2] * q[2] + q[3] * q[3]));
-        yaw *= 180.0 / Math.PI;
-        if (yaw < 0) yaw += 360.0; //compass circle
-        pitch *= 180.0 / Math.PI;
-        roll *= 180.0 / Math.PI;
-
         // Collect data for calibration if calibration is running
         if (calibrate) {
             calgXSum += gx;
@@ -234,6 +210,33 @@ namespace MintsparkMpu6050{
             calgZSum += gz;
             calCounter++;
         }
+
+        // Catch elapsed time since last update for integration
+        let istFirstUpdate = lastUpdate == 0;
+        let now = input.runningTime();
+        let deltat = (now - lastUpdate) / 1000; //seconds since last update
+        lastUpdate = now;
+
+        if (!istFirstUpdate)
+        {
+            // Integrate to calc pitch, roll, yaw (yaw has an empirical division by PI to provide correct degree values but not sure why :-)). Code based on: https://github.com/jremington/MPU-6050-Fusion/
+            // Conversions: http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles WARNING: This angular conversion is for DEMONSTRATION PURPOSES ONLY. It WILL MALFUNCTION for certain combinations of angles! See https://en.wikipedia.org/wiki/Gimbal_lock
+            Mahony_update_full(accel.accelX, accel.accelY, accel.accelZ, gyro.gyroX, gyro.gyroY, gyro.gyroZ / Math.PI, deltat);
+            roll = Math.atan2((q[0] * q[1] + q[2] * q[3]), 0.5 - (q[1] * q[1] + q[2] * q[2]));
+            pitch = Math.asin(2.0 * (q[0] * q[2] - q[1] * q[3]));
+            yaw = -Math.atan2((q[1] * q[2] + q[0] * q[3]), 0.5 - (q[2] * q[2] + q[3] * q[3]));
+
+            // Convert to degrees and limit yaw to 360
+            yaw *= 180.0 / Math.PI;
+            if (yaw < 0) yaw += 360.0; //compass circle
+            pitch *= 180.0 / Math.PI;
+            roll *= 180.0 / Math.PI;
+
+            // Update orientation
+            orientation = { pitch: pitch, roll: roll, yaw: yaw};
+        }
+
+        return { accell: accel, gyro:gyro, orientation:orientation };
     }
 
     export function CalibrateAccelGyro() {
