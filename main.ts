@@ -247,6 +247,7 @@ namespace MINTsparkMpu6050{
         let calibrationTime = seconds * 1000;
         let startTime = input.runningTime();
         calgXSum = 0, calgYSum = 0, calgZSum = 0, calCounter = 0;
+        roll = 0, pitch = 0, yaw = 0;
 
         // Start calibration
         calibrate = true;
