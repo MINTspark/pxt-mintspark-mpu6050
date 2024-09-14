@@ -10,7 +10,8 @@
     "files": [
         "README.md",
         "main.ts",
-        "pid.ts"
+        "pid.ts",
+        "drive.ts"
     ],
     "testFiles": [
         "test.ts"
