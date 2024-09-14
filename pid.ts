@@ -23,6 +23,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
  */
+//% weight=100 color=#DC22E1 block="MINTspark PID" blockId="MINTspark PID" icon="\uf0e7"
 namespace MINTsparkPid {
 
     /**
