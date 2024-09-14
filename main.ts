@@ -1,5 +1,5 @@
 // Code is based on FastIMU library: https://github.com/LiquidCGS/FastIMU
-//% weight=100 color=#DC22E1 block="MINTspark MPU6050" blockId="MINTspark MPU6050" icon="\uf0e7" advanced=true
+//% weight=100 color=#DC22E1 icon="\uf0e7" advanced=true
 namespace MINTsparkMpu6050{
     type AccelData = {
         accelX: number;
@@ -256,7 +256,15 @@ namespace MINTsparkMpu6050{
         return { accell: accel, gyro:gyro, orientation:orientation };
     }
 
-    export function Calibrate(seconds: number) {
+    //% block="Calibrate MPU6050 %seconds seconds"
+    //% group="Setup / Update"
+    //% weight=180
+    //% 
+    export function Calibrate(seconds: number = 1): void {
+        CalibrateMPU6050(seconds);
+    }
+
+    export function CalibrateMPU6050(seconds: number) {
         // Initial calibration using FIFO buffer
         calibrateAccelGyro();
         
