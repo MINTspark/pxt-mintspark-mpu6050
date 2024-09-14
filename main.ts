@@ -16,6 +16,7 @@ namespace MINTsparkMpu6050{
         pitch: number;
         roll: number;
         yaw: number;
+        yaw360: number;
     };
 
     type GyroDrift = {
@@ -79,7 +80,7 @@ namespace MINTsparkMpu6050{
     let gyro: GyroData = { gyroX: 0, gyroY: 0, gyroZ: 0 };
     let calibration: CalData = { accelBias: [0, 0, 0], gyroBias: [0, 0, 0], magBias: [0, 0, 0], magScale: [0, 0, 0], valid: true };
     let geometryIndex = 0;
-    let orientation: OrientationData = { pitch:0, roll:0, yaw:0 };
+    let orientation: OrientationData = { pitch:0, roll:0, yaw:0, yaw360:0 };
 
     export function InitMPU6050(mountIndex: number): boolean {
         // Check device is connected
@@ -228,12 +229,13 @@ namespace MINTsparkMpu6050{
 
             // Convert to degrees and limit yaw to 360
             yaw *= 180.0 / Math.PI;
-            if (yaw < 0) yaw += 360.0; //compass circle
+            let yaw360 = yaw;
+            if (yaw360 < 0) yaw360 += 360.0; //compass circle
             pitch *= 180.0 / Math.PI;
             roll *= 180.0 / Math.PI;
 
             // Update orientation
-            orientation = { pitch: pitch, roll: roll, yaw: yaw};
+            orientation = { pitch: pitch, roll: roll, yaw: yaw, yaw360: yaw360};
         }
 
         return { accell: accel, gyro:gyro, orientation:orientation };
