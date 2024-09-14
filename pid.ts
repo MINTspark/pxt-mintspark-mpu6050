@@ -23,8 +23,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
  */
-//% weight=100 color=#DC22E1 block="MINTspark PID" blockId="MINTspark PID" icon="\uf0e7"
-namespace MINTsparkPid {
+namespace MINTsparkMpu6050 {
 
     /**
      * A PID controller.
@@ -36,57 +35,46 @@ namespace MINTsparkPid {
         /*
         ** proportional gain
         */
-        //% blockCombine 
         public kp: number;
         /*
         ** integral gain
         */
-        //% blockCombine
         public ki: number;
         /*
         * derivative gain
         */
-        //% blockCombine
         public kd: number;
         /*
         ** anti windup recovery, 0..1
         */
-        //% blockCombine
         public kt: number;
         /*
         * derivative gain limit
         */
-        //% blockCombine
         public N: number;
         /*
         * Proportional set point weight        
         */
-        //% blockCombine
         public b: number;
         /*
         * set point
         */
-        //% blockCombine
         public ysp: number;
         /* 
         * current state value
         */
-        //% blockCombine
         public y: number;
         /*
         * current control value
         */
-        //% blockCombine
         public u: number;
         /*
         * minimum control value
         */
-        //% blockCombine
         public ulow: number;
         /*
         * maximum control value
         */
-        //% blockCombine
         public uhigh: number;
 
         // assign this value to log internal data
