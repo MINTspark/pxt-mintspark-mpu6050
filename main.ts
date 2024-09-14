@@ -1,5 +1,5 @@
 // Code is based on FastIMU library: https://github.com/LiquidCGS/FastIMU
-//% weight=100 color=#DC22E1 block="MINTspark MPU6050" blockId="MINTspark MPU6050" icon="\uf0e7"
+//% weight=100 color=#DC22E1 block="MINTspark MPU6050" blockId="MINTspark MPU6050" icon="\uf0e7" advanced=true
 namespace MINTsparkMpu6050{
     type AccelData = {
         accelX: number;
