@@ -1,4 +1,5 @@
 // Code is based on FastIMU library: https://github.com/LiquidCGS/FastIMU
+//% weight=100 color=#DC22E1 block="MINTspark MPU6050" blockId="MINTspark MPU6050" icon="\uf0e7"
 namespace MINTsparkMpu6050{
     type AccelData = {
         accelX: number;
@@ -82,6 +83,61 @@ namespace MINTsparkMpu6050{
     let geometryIndex = 0;
     let orientation: OrientationData = { pitch:0, roll:0, yaw:0, yaw360:0 };
 
+    //% group=Values
+    //% weight=100
+    //% block="Pitch"
+    export function GetPitch():number{
+        return orientation.pitch;
+    }
+    //% group=Values
+    //% weight=99
+    //% block="Roll"
+    export function GetRoll(): number {
+        return orientation.roll;
+    }
+
+    //% group=Values
+    //% weight=98
+    //% block="Yaw 360"
+    export function GetYaw360(): number {
+        return orientation.yaw360;
+    }
+
+    //% group=Values
+    //% weight=97
+    //% block="Yaw +-180"
+    export function GetYaw180(): number {
+        return orientation.yaw360;
+    }
+
+    //% group=Values
+    //% weight=96
+    //% block="Accel X"
+    export function GetAccelX(): number {
+        return accel.accelX;
+    }
+
+    //% group=Values
+    //% weight=95
+    //% block="Accel Y"
+    export function GetAccelY(): number {
+        return accel.accelY;
+    }
+
+    //% group=Values
+    //% weight=94
+    //% block="Accel Z"
+    export function GetAccelZ(): number {
+        return accel.accelZ;
+    }
+
+    //% block="Initialise MPU6050 with MountIndex %mountIndex"
+    //% group=Setup
+    //% weight=200
+    export function Initialise(mountIndex: number = 0): void {
+        InitMPU6050(mountIndex);
+    }
+
     export function InitMPU6050(mountIndex: number): boolean {
         // Check device is connected
         if (!(readByte(MPU6050_WHO_AM_I_MPU6050) == MPU6050_ADDRESS)) {
@@ -129,6 +185,13 @@ namespace MINTsparkMpu6050{
         basic.pause(100);
 
         return true;
+    }
+
+    //% block="Update MPU6050"
+    //% group=Setup
+    //% weight=190
+    export function Update(): void {
+        UpdateMPU6050();
     }
 
     export function UpdateMPU6050() : CurrentData {
