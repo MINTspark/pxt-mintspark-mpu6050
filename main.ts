@@ -582,7 +582,7 @@ namespace MINTsparkMpu6050{
     //% weight=97
     //% block="Yaw +-180"
     export function GetYaw180(): number {
-        return orientation.yaw360;
+        return orientation.yaw;
     }
 
     //% group=Values
