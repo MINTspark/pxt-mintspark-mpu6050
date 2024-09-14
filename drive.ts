@@ -7,20 +7,22 @@ namespace MINTsparkMpu6050 {
     //% inlineInputMode=inline
     //% weight=99
     export function startPIDHeadingCorrections(Kp: number, Ki: number, Kd: number): void {
-        stopheadingCorrections = false;
-        pidCorrection = 0;
-        let startTime = input.runningTime();
-        let lastUpdateTime = startTime;
-        let pidController = new MINTsparkMpu6050.PIDController();
-        pidController.setGains(Kp, Ki, Kd);
-        pidController.setPoint(MINTsparkMpu6050.UpdateMPU6050().orientation.yaw);
+        control.inBackground(() => {
+            stopheadingCorrections = false;
+            pidCorrection = 0;
+            let startTime = input.runningTime();
+            let lastUpdateTime = startTime;
+            let pidController = new MINTsparkMpu6050.PIDController();
+            pidController.setGains(Kp, Ki, Kd);
+            pidController.setPoint(MINTsparkMpu6050.UpdateMPU6050().orientation.yaw);
 
-        while (!stopheadingCorrections) {
-            let updateTime = input.runningTime();
-            pidCorrection = pidController.compute(updateTime - lastUpdateTime, MINTsparkMpu6050.UpdateMPU6050().orientation.yaw);
-            lastUpdateTime = updateTime;
-            basic.pause(10);
-        }
+            while (!stopheadingCorrections) {
+                let updateTime = input.runningTime();
+                pidCorrection = pidController.compute(updateTime - lastUpdateTime, UpdateMPU6050().orientation.yaw);
+                lastUpdateTime = updateTime;
+                basic.pause(10);
+            }
+        });
     }
 
     //% block="Stop PID Heading Corrections"
