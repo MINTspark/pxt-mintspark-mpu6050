@@ -265,6 +265,9 @@ namespace MINTsparkMpu6050{
     }
 
     export function CalibrateMPU6050(seconds: number) {
+        q =[1.0, 0.0, 0.0, 0.0];
+        lastUpdate= 0;
+        
         // Initial calibration using FIFO buffer
         calibrateAccelGyro();
         
