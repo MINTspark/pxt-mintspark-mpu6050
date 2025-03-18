@@ -104,6 +104,7 @@ namespace MINTsparkMpu6050 {
          */
         //% blockId=pidReset block="reset %pid"
         //% group=PID
+        //% weight=50
         reset() {
             this.I = 0;
             this.D = 0;
@@ -119,7 +120,7 @@ namespace MINTsparkMpu6050 {
         //% blockId=pidSetGains block="set %pid|gains kp %kp|ki %ki|kd %kd"
         //% group=PID
         //% inlineInputMode=inline
-        //% weight=99
+        //% weight=49
         setGains(kp: number, ki: number, kd: number, b: number = 1) {
             kp = Math.max(0, kp);
             ki = Math.max(0, ki);
@@ -141,7 +142,8 @@ namespace MINTsparkMpu6050 {
          * @param low lowest control value, eg: -100
          * @param high highest control value, eg: 100
          */
-        //% blockId=pidSetSaturation block="set %pid|control saturation from %low|to %high"        
+        //% blockId=pidSetSaturation block="set %pid|control saturation from %low|to %high"   
+        //% weight=39
         setControlSaturation(low: number, high: number) {
             this.ulow = low;
             this.uhigh = high;
@@ -154,6 +156,7 @@ namespace MINTsparkMpu6050 {
         //% blockId=pidSetDerivativeFilter block="set %pid|derivative filter %N"
         //% N.min=2 N.max=20
         //% group=PID
+        //% weight=38
         setDerivativeFilter(N: number) {
             this.N = Math.clamp(2, 20, N);
         }
@@ -163,6 +166,7 @@ namespace MINTsparkMpu6050 {
          * @param ysp 
          */
         //% blockId=pidSetPoint block="set %pid|point to %ysp"
+        //% weight=48
         setPoint(ysp: number) {
             this.ysp = ysp;
         }
@@ -172,7 +176,7 @@ namespace MINTsparkMpu6050 {
          */
         //% blockId=pidCompute block="%pid|compute for timestep %timestep|(ms) at state %y"
         //% group=PID
-        //% weight=100
+        //% weight=45
         compute(timestep: number, y: number): number {
             const h = timestep / 1000.0;
             const K = this.kp;
